@@ -91,6 +91,11 @@ export const config: Config = {
     return new Promise(resolve => htmlReporter.afterLaunch(resolve.bind(this, exitCode)));
   },
   suites: {
+    baremetal: [
+      'tests/kubevirt/kubevirt.login.scenario.ts',
+      'tests/metalkube/base.scenario.ts',
+      'tests/metalkube/maintenance.scenario.ts',
+    ],
     filter: [
       'tests/login.scenario.ts',
       'tests/base.scenario.ts',
