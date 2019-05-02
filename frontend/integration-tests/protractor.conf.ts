@@ -93,7 +93,6 @@ export const config: Config = {
   suites: {
     baremetal: [
       'tests/kubevirt/kubevirt.login.scenario.ts',
-      'tests/metalkube/base.scenario.ts',
       'tests/metalkube/maintenance.scenario.ts',
     ],
     filter: [
