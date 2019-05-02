@@ -10,7 +10,7 @@ describe('Start and stop maintenance master-0', () => {
     await browser.get(`${appHost}/k8s/all-namespaces/baremetalhosts`);
     await crudView.isLoaded();
     // confirm that we're on the right page by testing that the "create" button adds a host
-    expect(crudView.createYAMLButton.getText()).toEqual("Add Host");
+    expect(crudView.createYAMLButton.getText()).toEqual('Add Host');
   });
 
   it(`find master-0 and check it's status`, async() => {
