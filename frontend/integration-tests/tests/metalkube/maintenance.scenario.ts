@@ -5,6 +5,15 @@ import * as crudView from '../../views/crud.view';
 import * as bareMetalHostView from '../../views/metalkube/baremetalhost.view';
 
 const masterNode = 'openshift-master-0';
+const provisionedStat = 'Provisioned';
+const externallyProvisionedStat = 'Externally provisioned';
+const startingMaintenanceStat = 'Starting maintenance';
+var provisionedCond = function(elem) {
+  return until.or(
+    until.textToBePresentInElement(elem, provisionedStat),
+    until.textToBePresentInElement(elem, externallyProvisionedStat)
+  );
+};
 
 describe(`Start and stop maintenance ${masterNode}`, () => {
   it('go to /k8s/all-namespaces/baremetalhosts', async() => {
@@ -19,23 +28,18 @@ describe(`Start and stop maintenance ${masterNode}`, () => {
     browser.wait(until.presenceOf(crudView.rowForName(masterNode)));
     expect(crudView.rowForName(masterNode).isDisplayed()).toBe(true);
     expect(bareMetalHostView.hostname(masterNode).isDisplayed()).toBe(true);
-    const stat = await bareMetalHostView.status(masterNode).getText();
-    expect(stat === 'Provisioned' || stat === 'Externally provisioned').toBe(true);
+    browser.wait(provisionedCond(bareMetalHostView.status(masterNode)), 1000);
   });
 
   it(`start maintenance on ${masterNode}`, async() => {
     await crudView.selectOptionFromGear(masterNode, 'Start Maintenance');
     await bareMetalHostView.confirmAction();
-    browser.wait(until.textToBePresentInElement(bareMetalHostView.status(masterNode), 'Starting maintenance'), 5000);
-    const stat = await bareMetalHostView.status(masterNode).getText();
-    expect(stat).toEqual('Starting maintenance');
+    browser.wait(until.textToBePresentInElement(bareMetalHostView.status(masterNode), startingMaintenanceStat), 5000);
   });
 
   it(`stop maintenance on ${masterNode}`, async() => {
     await crudView.selectOptionFromGear(masterNode, 'Stop Maintenance');
     await bareMetalHostView.confirmAction();
-    browser.wait(until.textToBePresentInElement(bareMetalHostView.status(masterNode), 'rovisioned'), 5000);
-    const stat = await bareMetalHostView.status(masterNode).getText();
-    expect(stat === 'Provisioned' || stat === 'Externally provisioned').toBe(true);
+    browser.wait(provisionedCond(bareMetalHostView.status(masterNode)), 5000);
   });
 });
