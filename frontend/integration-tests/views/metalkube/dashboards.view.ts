@@ -5,13 +5,13 @@ export const untilNoLoadersPresent = waitForNone($$('.co-m-loader'));
 export const isLoaded = () => browser.wait(untilNoLoadersPresent).then(() => browser.sleep(2000));
 
 // Usage example:
-// await dashboardView.inventoryItemLabel(dashboardView.INVENTORY_NODES).getText()
+// await dashboardView.inventoryItemLabel(0).getText()
 export function inventoryItemLabel(rowNumber) {
   return element(by.xpath(`(//div[@class="kubevirt-inventory__row-title"])[${rowNumber + 1}]`));
 }
 
 // Usage example:
-// await dashboardView.inventoryUpCounter(dashboardView.INVENTORY_NODES).getText()
+// await dashboardView.inventoryUpCounter(0).getText()
 export function inventoryUpCounter(rowNumber) {
   // Explaining the xpath:
   // There is an array of 6 kubevirt-inventory__row-status items (one for each line in the inventory).
@@ -25,7 +25,7 @@ export function inventoryUpCounter(rowNumber) {
 }
 
 // Usage example:
-// await dashboardView.inventoryDownCounter(dashboardView.INVENTORY_NODES).getText()
+// await dashboardView.inventoryDownCounter(0).getText()
 export function inventoryDownCounter(rowNumber) {
   // Similar xpath explanation to the one in inventoryUpCounter(), but now we're finding the counter
   // next to the kubevirt-inventory__row-status-item-icon--error.
@@ -35,12 +35,28 @@ export function inventoryDownCounter(rowNumber) {
     '/../span[contains(@class, "kubevirt-inventory__row-status-item-text")]'));
 }
 
-export const INVENTORY_NODES = 0;
-export const INVENTORY_HOSTS = 1;
-export const INVENTORY_PVCS = 2;
-export const INVENTORY_PODS = 3;
-export const INVENTORY_VMS = 4;
-export const INVENTORY_DISKS = 5;
+// substrings to identify the rows in the inventory card
+export const INVENTORY_NODES = ' Nodes';
+export const INVENTORY_HOSTS = ' Hosts';
+export const INVENTORY_PVCS = ' PVCs';
+export const INVENTORY_PODS = ' Pods';
+export const INVENTORY_VMS = ' VMs';
+export const INVENTORY_DISKS = ' Disks';
+
+// Usage example:
+// const rowNumber = await dashboardView.inventoryRow(dashboardView.INVENTORY_HOSTS);
+export const inventoryRow = async(substrInventory) => {
+  const elements = await $$('.kubevirt-inventory__row-title');
+  let i; // not using a forEach loop because you can't break or return from it
+  for (i = 0; i < elements.length; i++) {
+    const inventoryLabel = await elements[i].getText();
+    if (inventoryLabel.indexOf(substrInventory) > -1) {
+      return new Promise(resolve => {
+        resolve(i);
+      });
+    }
+  }
+};
 
 // Usage example:
 // await dashboardView.sysEventTime(0).getText()
@@ -98,4 +114,14 @@ export function alertItemMessage(rowNumber) {
   return element(by.xpath('//div[@class="kubevirt-alert__alerts-body"]' +
     `/div[@class="kubevirt-alert__item"][${rowNumber + 1}]` +
     '/div[@class="kubevirt-alert__item-message"]'));
+}
+
+// Utility function: getTextIfPresent
+export async function getTextIfPresent(elem, textIfNotPresent='') {
+  if (await elem.isPresent()) {
+    return elem.getText();
+  }
+  return new Promise(resolve => {
+    resolve(textIfNotPresent);
+  });
 }
