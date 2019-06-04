@@ -5,11 +5,13 @@ import { appHost } from '../../protractor.conf';
 import * as dashboardView from '../../views/metalkube/dashboards.view';
 
 describe('Inventory card', () => {
-  it('Node count is displayed', async() => {
+  beforeAll(async() => {
     await browser.get(`${appHost}/dashboards`);
     await dashboardView.isLoaded();
     browser.sleep(10000); // the counters on the page start updating late...
+  });
 
+  it('Node count is displayed', async() => {
     // get the number of ready and not ready nodes from the CLI
     let readyNodes = 0;
     let notReadyNodes = 0;
