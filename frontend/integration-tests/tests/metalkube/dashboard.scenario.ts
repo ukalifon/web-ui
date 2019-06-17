@@ -4,6 +4,17 @@ const execSync = require('child_process').execSync;
 import { appHost } from '../../protractor.conf';
 import * as dashboardView from '../../views/metalkube/dashboards.view';
 
+async function expectCounters(rowNumber, upCounterExpected, downCounterExpected, label) {
+  const inventoryItemLabel = await dashboardView.inventoryItemLabel(rowNumber).getText();
+  expect(inventoryItemLabel).toEqual(`${upCounterExpected + downCounterExpected} ${label}`);
+  let elem = dashboardView.inventoryUpCounter(rowNumber);
+  const upHosts = Number(await dashboardView.getTextIfPresent(elem, '0'));
+  elem = dashboardView.inventoryDownCounter(rowNumber);
+  const downHosts = Number(await dashboardView.getTextIfPresent(elem, '0'));
+  expect(upHosts).toEqual(upCounterExpected);
+  expect(downHosts).toEqual(downCounterExpected);
+}
+
 describe('Inventory card', () => {
   beforeAll(async() => {
     await browser.get(`${appHost}/dashboards`);
@@ -26,14 +37,7 @@ describe('Inventory card', () => {
       }
     });
     const rowNumber = await dashboardView.inventoryRow(dashboardView.INVENTORY_NODES);
-    const inventoryItemLabel = await dashboardView.inventoryItemLabel(rowNumber).getText();
-    expect(inventoryItemLabel).toEqual(`${readyNodes + notReadyNodes} Nodes`);
-    let elem = dashboardView.inventoryUpCounter(rowNumber);
-    const upNodes = Number(await dashboardView.getTextIfPresent(elem, '0'));
-    elem = dashboardView.inventoryDownCounter(rowNumber);
-    const downNodes = Number(await dashboardView.getTextIfPresent(elem, '0'));
-    expect(upNodes).toEqual(readyNodes);
-    expect(downNodes).toEqual(notReadyNodes);
+    expectCounters(rowNumber, readyNodes, notReadyNodes, 'Nodes');
   });
 
   it('Host count is displayed', async() => {
@@ -52,13 +56,6 @@ describe('Inventory card', () => {
       }
     });
     const rowNumber = await dashboardView.inventoryRow(dashboardView.INVENTORY_HOSTS);
-    const inventoryItemLabel = await dashboardView.inventoryItemLabel(rowNumber).getText();
-    expect(inventoryItemLabel).toEqual(`${readyHosts + notReadyHosts} Hosts`);
-    let elem = dashboardView.inventoryUpCounter(rowNumber);
-    const upHosts = Number(await dashboardView.getTextIfPresent(elem, '0'));
-    elem = dashboardView.inventoryDownCounter(rowNumber);
-    const downHosts = Number(await dashboardView.getTextIfPresent(elem, '0'));
-    expect(upHosts).toEqual(readyHosts);
-    expect(downHosts).toEqual(notReadyHosts);
+    expectCounters(rowNumber, readyHosts, notReadyHosts, 'Hosts');
   });
 });
