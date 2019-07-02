@@ -90,6 +90,9 @@ export const config: Config = {
     return new Promise(resolve => htmlReporter.afterLaunch(resolve.bind(this, exitCode)));
   },
   suites: {
+    baremetalSmokeTests: [
+      'tests/metalkube/dashboard.scenario.ts',
+    ],
     filter: suite([
       'tests/filter.scenario.ts',
     ]),

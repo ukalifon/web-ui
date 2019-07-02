@@ -45,7 +45,7 @@ const getStatusGroupIcons = (flags: FlagsObject) => {
 };
 
 export const InventoryItem: React.FC<InventoryItemProps> = React.memo(
-  ({ isLoading, singularTitle, pluralTitle, count, children, error = false }) => {
+  ({ isLoading, singularTitle, pluralTitle, count, children, error = false, ...props }) => {
     const title = count !== 1 ? pluralTitle : singularTitle;
     let status: React.ReactNode;
     if (error) {
@@ -56,7 +56,7 @@ export const InventoryItem: React.FC<InventoryItemProps> = React.memo(
       status = children;
     }
     return (
-      <div className="co-inventory-card__item">
+      <div data-test-id={props['data-test-id']} className="co-inventory-card__item">
         <div className="co-inventory-card__item-title">{isLoading || error ? title : `${count} ${title}`}</div>
         <div className="co-inventory-card__item-status">{status}</div>
       </div>
@@ -79,6 +79,7 @@ const StatusLink: React.FC<StatusLinkProps> = React.memo(
   ({ groupID, count, statusIDs, kind, namespace, filterType, flags }) => {
     const statusItems = encodeURIComponent(statusIDs.join(','));
     const namespacePath = namespace ? `ns/${namespace}` : 'all-namespaces';
+    const cleanStatusItems = statusIDs.join('-').toLowerCase();
     const to = filterType && statusItems.length > 0 ? `/k8s/${namespacePath}/${kind.plural}?rowFilter-${filterType}=${statusItems}` : `/k8s/${namespacePath}/${kind.plural}`;
     const statusGroupIcons = getStatusGroupIcons(flags);
     const groupIcon = statusGroupIcons[groupID] || statusGroupIcons[InventoryStatusGroup.NOT_MAPPED];
@@ -87,6 +88,7 @@ const StatusLink: React.FC<StatusLinkProps> = React.memo(
         <Link to={to} style={{textDecoration: 'none'}}>
           <span className="co-dashboard-icon">{groupIcon}</span>
           <span className="co-inventory-card__status-text">{count}</span>
+          <span data-test-id={`console-dashboard-inventory-count-${ cleanStatusItems }`} className="co-inventory-card__status-text">{count}</span>
         </Link>
       </div>
     );
@@ -96,7 +98,7 @@ const StatusLink: React.FC<StatusLinkProps> = React.memo(
 export const ResourceInventoryItem = connectToFlags<ResourceInventoryItemProps>(
   ...getFlagsForExtensions(plugins.registry.getDashboardsInventoryItemGroups()),
 )(React.memo(
-  ({ kind, useAbbr, resources, additionalResources, isLoading, mapper, namespace, error, showLink = true, flags = {}}) => {
+  ({ kind, useAbbr, resources, additionalResources, isLoading, mapper, namespace, error, showLink = true, flags = {}, ...props }) => {
     const groups = mapper(resources, additionalResources);
     const [singularTitle, pluralTitle] = useAbbr ? [kind.abbr, `${kind.abbr}s`] : [kind.label, kind.labelPlural];
     return (
@@ -106,6 +108,7 @@ export const ResourceInventoryItem = connectToFlags<ResourceInventoryItemProps>(
         pluralTitle={pluralTitle}
         count={resources.length}
         error={error}
+        data-test-id={props['data-test-id']}
       >
         {Object.keys(groups).filter(key => groups[key].count > 0).map(key => showLink ?
           (
@@ -141,6 +144,7 @@ type InventoryItemProps = {
   count: number;
   children?: React.ReactNode;
   error: boolean;
+  'data-test-id'?: string;
 };
 
 type StatusProps = WithFlagsProps & {
@@ -165,4 +169,5 @@ type ResourceInventoryItemProps = WithFlagsProps & {
   namespace?: string;
   error: boolean;
   showLink?: boolean;
+  'data-test-id'?: string;
 }

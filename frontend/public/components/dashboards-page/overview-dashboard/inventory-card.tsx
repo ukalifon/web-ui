@@ -89,9 +89,9 @@ const InventoryCard_: React.FC<DashboardItemProps & WithFlagsProps> = ({
       </DashboardCardHeader>
       <DashboardCardBody>
         <InventoryBody>
-          <ResourceInventoryItem isLoading={!nodesLoaded} error={!!nodesLoadError} kind={NodeModel} resources={nodesData} mapper={getNodeStatusGroups} />
-          <ResourceInventoryItem isLoading={!podsLoaded} error={!!podsLoadError} kind={PodModel} resources={podsData} mapper={getPodStatusGroups} />
-          <ResourceInventoryItem isLoading={!pvcsLoaded} error={!!pvcsLoadError} kind={PersistentVolumeClaimModel} useAbbr resources={pvcsData} mapper={getPVCStatusGroups} />
+          <ResourceInventoryItem isLoading={!nodesLoaded} error={!!nodesLoadError} kind={NodeModel} resources={nodesData} mapper={getNodeStatusGroups} data-test-id="console-dashboard-inventory-node" />
+          <ResourceInventoryItem isLoading={!podsLoaded} error={!!podsLoadError} kind={PodModel} resources={podsData} mapper={getPodStatusGroups} data-test-id="console-dashboard-inventory-pod" />
+          <ResourceInventoryItem isLoading={!pvcsLoaded} error={!!pvcsLoadError} kind={PersistentVolumeClaimModel} useAbbr resources={pvcsData} mapper={getPVCStatusGroups} data-test-id="console-dashboard-inventory-pvc" />
           {pluginItems.map((item, index) => {
             const resource = _.get(resources, uniqueResource(item.properties.resource, index).prop);
             const resourceLoaded = _.get(resource, 'loaded');
@@ -121,6 +121,7 @@ const InventoryCard_: React.FC<DashboardItemProps & WithFlagsProps> = ({
                 additionalResources={additionalResourcesData}
                 mapper={item.properties.mapper}
                 useAbbr={item.properties.useAbbr}
+                data-test-id={`console-dashboard-inventory-${ item.properties.model.id}`}
               />
             );
           })}
